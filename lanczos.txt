@@ -1,0 +1,46 @@
+function [V, T] = lanczos(A, k, tol)
+    % Initialize the Lanczos vectors and tridiagonal matrix as sparse
+    V = sparse(size(A, 1), k);
+    T = sparse(k, k);
+    
+    % Choose a random starting vector
+    b = randn(size(A, 1), 1);
+    b = b / norm(b);
+    
+    % Initialize the first Lanczos vector
+    V(:, 1) = b;
+    
+    % Initialize the first vector for orthogonalization
+    v = A * V(:, 1);
+    
+    % Initialize the diagonal element of T
+    alpha = v' * V(:, 1);
+    T(1, 1) = alpha;
+    
+    % Initialize the first residual vector
+    r = v - alpha * V(:, 1);
+    
+    % Iterate the Lanczos algorithm
+    for i = 1:k-1
+        % Normalize the residual vector
+        beta = norm(r);
+        v = r / beta;
+        
+        % Update the Lanczos vectors
+        V(:, i+1) = v;
+        
+        % Compute the matrix-vector product
+        w = A * v;
+        
+        % Compute the new alpha
+        alpha = w' * v;
+        T(i+1, i+1) = alpha;
+        
+        % Update the residual vector
+        r = w - alpha * v - beta * V(:, i);
+        
+        % Update the tridiagonal matrix
+        T(i, i+1) = beta;
+        T(i+1, i) = beta;
+    end
+end
